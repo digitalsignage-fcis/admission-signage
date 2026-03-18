@@ -34,13 +34,7 @@
   .logo-area { display: flex; align-items: center; gap: 15px; font-size: 2rem; font-weight: 900; white-space: nowrap; }
   .school-logo { height: 70px; width: auto; object-fit: contain; }
 
-  .weather-header-area {
-    padding: 10px 0;
-    height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  .weather-header-area { padding: 10px 0; height: 120px; display: flex; align-items: center; justify-content: center; }
 
   .datetime-area { text-align: right; }
   .time { font-size: 2.8rem; font-weight: 900; line-height: 1; color: var(--card-yellow); white-space: nowrap; }
@@ -51,17 +45,7 @@
   .card { border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); position: relative; overflow: hidden; }
   
   .left-col .photo-section { flex: 1.4; background-color: #000; display: flex; align-items: center; justify-content: center; }
-  
-  .left-col .announce-section { 
-    flex: 1; 
-    background-color: var(--card-yellow); 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: center; 
-    align-items: center; 
-    padding: 2.5rem; 
-    text-align: center;
-  }
+  .left-col .announce-section { flex: 1; background-color: var(--card-yellow); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2.5rem; text-align: center; }
 
   .right-col .announce-photo-section { flex: 1; background-color: #ffffff; display: flex; align-items: center; justify-content: center; }
 
@@ -71,23 +55,20 @@
   .photo-label { position: absolute; bottom: 0; left: 0; background: rgba(0,0,0,0.7); color: white; padding: 0.6rem 1.2rem; font-size: 1.3rem; font-weight: 700; border-top-right-radius: 20px; z-index: 5; }
   .notice-label { bottom: 15px; left: 15px; background: var(--fcis-blue); border-radius: 30px; font-size: 1rem; padding: 0.4rem 1rem; border-top-right-radius: 30px; }
 
-  .slide { 
-    position: absolute; 
-    width: 90%; 
-    height: 85%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    opacity: 0; 
-    transition: opacity 0.6s ease; 
-  }
+  .slide { position: absolute; width: 90%; height: 85%; display: flex; flex-direction: column; justify-content: center; opacity: 0; transition: opacity 0.6s ease; }
   .slide.active { opacity: 1; position: relative; }
-
   .slide-title { font-size: 3rem; font-weight: 900; margin-bottom: 0.5rem; line-height: 1.1; }
   .slide-text { font-weight: 700; color: rgba(0,0,0,0.8); line-height: 1.3; }
 
+  /* TICKER SPEED FIX */
   .ticker-wrap { background: var(--card-red); color: var(--text-light); padding: 1.2rem 0; overflow: hidden; white-space: nowrap; flex-shrink: 0; }
-  .ticker { display: inline-block; padding-left: 100%; animation: tickerAnim 40s linear infinite; font-size: 2rem; font-weight: 700; }
+  .ticker { 
+    display: inline-block; 
+    padding-left: 100%; 
+    animation: tickerAnim linear infinite; /* Duration is now set by JS */
+    font-size: 2rem; 
+    font-weight: 700; 
+  }
   @keyframes tickerAnim { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 </style>
 </head>
@@ -117,10 +98,8 @@
         </div>
         <div class="photo-label">📸 Featured Moment</div>
       </div>
-
       <div class="card announce-section" id="announce-slider-container"></div>
     </div>
-
     <div class="col right-col">
       <div class="card announce-photo-section">
         <img id="announce-slide-img" class="drive-img poster-img" src="" style="opacity: 0; transition: opacity 0.8s ease-in-out;">
@@ -134,22 +113,14 @@
   </div>
 
 <script>
-    // 12-HOUR CLOCK SETTING
     function updateDateTime() {
       const now = new Date();
-      // Changed hour12 to true
-      document.getElementById("time").textContent = now.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit', 
-        hour12: true 
-      });
+      document.getElementById("time").textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
       document.getElementById("date").textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
     }
     setInterval(updateDateTime, 1000);
     updateDateTime();
 
-    // AUTO-FIT FONT SIZE LOGIC
     function getFitFontSize(textLength) {
       if (textLength < 60) return "2.8rem";
       if (textLength < 160) return "2.2rem";
@@ -251,10 +222,7 @@
         const slide = document.createElement("div");
         slide.className = `slide ${idx === 0 ? 'active' : ''}`;
         const dynamicSize = getFitFontSize(ann.text.length);
-        slide.innerHTML = `
-          <div class="slide-title">${ann.emoji} ${ann.title}</div>
-          <div class="slide-text" style="font-size: ${dynamicSize}">${ann.text}</div>
-        `;
+        slide.innerHTML = `<div class="slide-title">${ann.emoji} ${ann.title}</div><div class="slide-text" style="font-size: ${dynamicSize}">${ann.text}</div>`;
         container.appendChild(slide);
       });
     }
@@ -267,19 +235,28 @@
       slides[sheetTextIndex].classList.add("active");
     }
 
+    // UPDATED TICKER LOGIC
     function buildTicker() {
       const tickerContainer = document.getElementById("dynamic-ticker");
       tickerContainer.innerHTML = ""; 
+      let totalChars = 0;
+
       globalData.tickerItems.forEach(item => {
         const span = document.createElement("span");
-        span.style.marginRight = "5rem";
+        span.style.marginRight = "6rem";
         span.innerHTML = `<strong style="color: var(--card-yellow)">${item.category}:</strong> ${item.message}`;
         tickerContainer.appendChild(span);
+        // Track character count to estimate width
+        totalChars += (item.category.length + item.message.length + 15);
       });
+
+      // Calculate speed: We want a constant speed of roughly 150px per second.
+      // 0.15 seconds per character is usually a very readable "smooth" pace.
+      const calculatedDuration = Math.max(25, totalChars * 0.15); 
+      tickerContainer.style.animationDuration = `${calculatedDuration}s`;
     }
 
     fetchMasterData();
 </script>
 </body>
 </html>
-
